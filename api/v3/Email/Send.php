@@ -88,10 +88,8 @@ function civicrm_api3_email_send($params) {
   $messageTemplates = new CRM_Core_DAO_MessageTemplate();
   $messageTemplates->id = $params['template_id'];
 
-  // From header defaults to site default.
   list($defaultFromName, $defaultFromEmail) = CRM_Core_BAO_Domain::getNameAndEmail();
   $from = "\"$defaultFromName\" <$defaultFromEmail>";
-
   if (!empty($params['from_email']) && !empty($params['from_name'])) {
     // If both an email and a name are provided, use those as the from header.
     $from = '"' . $params['from_name'] . '" <' . $params['from_email'] . '>';
@@ -196,10 +194,17 @@ function civicrm_api3_email_send($params) {
     ];
     CRM_Activity_BAO_ActivityContact::create($activityTargetParams);
 
+    $caseId = NULL;
     if (!empty($case_id)) {
+      $caseId = $case_id;
+    }
+    if (!empty($params['case_id'])) {
+      $caseId = $case_id;
+    }
+    if ($caseId) {
       $caseActivity = [
         'activity_id' => $activity['id'],
-        'case_id' => $case_id,
+        'case_id' => $caseId,
       ];
       CRM_Case_BAO_Case::processCaseActivity($caseActivity);
     }
