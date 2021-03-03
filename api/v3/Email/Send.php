@@ -199,7 +199,7 @@ function civicrm_api3_email_send($params) {
       $caseId = $case_id;
     }
     if (!empty($params['case_id'])) {
-      $caseId = $case_id;
+      $caseId = $params['case_id'];
     }
     if ($caseId) {
       $caseActivity = [
