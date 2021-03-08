@@ -228,10 +228,17 @@ function civicrm_api3_email_send($params) {
     ];
     CRM_Activity_BAO_ActivityContact::create($activityTargetParams);
 
+    $caseId = NULL;
     if (!empty($case_id)) {
+      $caseId = $case_id;
+    }
+    if (!empty($params['case_id'])) {
+      $caseId = $params['case_id'];
+    }
+    if ($caseId) {
       $caseActivity = [
         'activity_id' => $activity['id'],
-        'case_id' => $case_id,
+        'case_id' => $caseId,
       ];
       CRM_Case_BAO_Case::processCaseActivity($caseActivity);
     }
