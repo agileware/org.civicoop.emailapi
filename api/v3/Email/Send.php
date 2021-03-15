@@ -56,7 +56,7 @@ function _civicrm_api3_email_send_spec(&$spec) {
   ];
 
   // Copy from MessageTemplate.send API
-  $params['disable_smarty'] = [
+  $spec['disable_smarty'] = [
     'description' => 'Disable Smarty. Normal CiviMail tokens are still supported. By default Smarty is enabled if configured by CIVICRM_MAIL_SMARTY.' ,
     'title' => 'Disable Smarty',
     'type' => CRM_Utils_Type::T_BOOLEAN,
