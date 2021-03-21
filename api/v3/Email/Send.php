@@ -61,6 +61,13 @@ function _civicrm_api3_email_send_spec(&$spec) {
     'title' => 'Disable Smarty',
     'type' => CRM_Utils_Type::T_BOOLEAN,
   ];
+
+  $spec['create_activity'] = [
+    'title' => 'Create Activity',
+    'description' => 'Usually an Email activity is created when an email is sent.',
+    'type' => CRM_Utils_Type::T_BOOLEAN,
+    'api.default' => 1,
+  ];
 }
 
 /**
@@ -152,62 +159,80 @@ function civicrm_api3_email_send($params) {
     if ($html && ($contact['preferred_mail_format'] == 'HTML' || $contact['preferred_mail_format'] == 'Both')) {
       $mailParams['html'] = $html;
     }
-    if (isset($params['cc']) && !empty($params['cc'])) {
+    if (!empty($params['cc'])) {
       $mailParams['cc'] = $params['cc'];
     }
-    if (isset($params['bcc']) && !empty($params['bcc'])) {
+    if (!empty($params['bcc'])) {
       $mailParams['bcc'] = $params['bcc'];
     }
+
+
+    // We are ready to send. Record that we are going to try to send the email.
+    if ($params['create_activity']) {
+      //create activity for sending e-mail.
+      $activityTypeID = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_type_id', 'Email');
+
+      // CRM-6265: save both text and HTML parts in details (if present)
+      if ($html and $text) {
+        $details = "-ALTERNATIVE ITEM 0-\n$html\n-ALTERNATIVE ITEM 1-\n$text\n-ALTERNATIVE END-\n";
+      }
+      else {
+        $details = $html ? $html : $text;
+      }
+
+      $activityParams = [
+        'source_contact_id' => $contactId,
+        'activity_type_id' => $activityTypeID,
+        'activity_date_time' => date('YmdHis'),
+        'subject' => $messageSubject,
+        'details' => $details,
+        'status_id' => CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_status_id', 'Cancelled'),
+      ];
+      $activity = civicrm_api3('Activity', 'create', $activityParams);
+
+      $activityContacts = CRM_Core_OptionGroup::values('activity_contacts', FALSE, FALSE, FALSE, NULL, 'name');
+      $targetID = CRM_Utils_Array::key('Activity Targets', $activityContacts);
+
+      $activityTargetParams = [
+        'activity_id' => $activity['id'],
+        'contact_id' => $contactId,
+        'record_type_id' => $targetID
+      ];
+      CRM_Activity_BAO_ActivityContact::create($activityTargetParams);
+
+      $caseId = NULL;
+      if (!empty($case_id)) {
+        $caseId = $case_id;
+      }
+      if (!empty($params['case_id'])) {
+        $caseId = $params['case_id'];
+      }
+      if ($caseId) {
+        $caseActivity = [
+          'activity_id' => $activity['id'],
+          'case_id' => $caseId,
+        ];
+        CRM_Case_BAO_Case::processCaseActivity($caseActivity);
+      }
+    }
+
+
+    // Try to send the email.
     $result = CRM_Utils_Mail::send($mailParams);
     if (!$result) {
       throw new API_Exception('Error sending e-mail to ' . $contact['display_name'] . ' <' . $toEmail . '> ');
     }
 
-    //create activity for sending e-mail.
-    $activityTypeID = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_type_id', 'Email');
-
-    // CRM-6265: save both text and HTML parts in details (if present)
-    if ($html and $text) {
-      $details = "-ALTERNATIVE ITEM 0-\n$html\n-ALTERNATIVE ITEM 1-\n$text\n-ALTERNATIVE END-\n";
-    }
-    else {
-      $details = $html ? $html : $text;
-    }
-
-    $activityParams = [
-      'source_contact_id' => $contactId,
-      'activity_type_id' => $activityTypeID,
-      'activity_date_time' => date('YmdHis'),
-      'subject' => $messageSubject,
-      'details' => $details,
-      'status_id' => CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_status_id', 'Completed'),
-    ];
-    $activity = civicrm_api3('Activity', 'create', $activityParams);
-
-    $activityContacts = CRM_Core_OptionGroup::values('activity_contacts', FALSE, FALSE, FALSE, NULL, 'name');
-    $targetID = CRM_Utils_Array::key('Activity Targets', $activityContacts);
-
-    $activityTargetParams = [
-      'activity_id' => $activity['id'],
-      'contact_id' => $contactId,
-      'record_type_id' => $targetID
-    ];
-    CRM_Activity_BAO_ActivityContact::create($activityTargetParams);
-
-    $caseId = NULL;
-    if (!empty($case_id)) {
-      $caseId = $case_id;
-    }
-    if (!empty($params['case_id'])) {
-      $caseId = $params['case_id'];
-    }
-    if ($caseId) {
-      $caseActivity = [
-        'activity_id' => $activity['id'],
-        'case_id' => $caseId,
+    if ($params['create_activity']) {
+      // Update the activity to Completed, since we know sending was successful.
+      $activityParams = [
+        'id' => $activity['id'],
+        'status_id' => CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_status_id', 'Completed'),
+        'return' => 'id',
       ];
-      CRM_Case_BAO_Case::processCaseActivity($caseActivity);
+      civicrm_api3('Activity', 'create', $activityParams);
     }
+
 
     $returnValues[$contactId] = [
       'contact_id' => $contactId,
