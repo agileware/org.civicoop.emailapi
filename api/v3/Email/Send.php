@@ -216,6 +216,8 @@ function civicrm_api3_email_send($params) {
       }
     }
 
+    // Set the ID of the email activity (if we created one)
+    $mailParams['emailActivityID'] = $activity['id'] ?? NULL;
 
     // Try to send the email.
     $result = CRM_Utils_Mail::send($mailParams);
