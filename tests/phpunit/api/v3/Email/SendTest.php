@@ -114,6 +114,26 @@ class api_v3_Email_SendTest extends \PHPUnit\Framework\TestCase implements Headl
   }
 
   /**
+   * Simple example test case.
+   *
+   * Note how the function name begins with the word "test".
+   */
+  public function testSubject() {
+    civicrm_api3('Email', 'send', [
+      'contact_id'  => $this->contactID,
+      'template_id' => $this->messageTemplates[0],
+      'subject' => 'Custom subject {contact.first_name}'
+    ]);
+
+    list($mock, $recipientEmail, $message) = array_shift(static::$sentMail);
+    $this->assertInstanceOf(\Mail_mock::class, $mock);
+    $this->assertCount(1, $mock->sentMessages);
+    $sent = $mock->sentMessages[0];
+    $this->assertEquals(['testy@example.org'], $sent['recipients']);
+    $this->assertEquals('Custom subject Testy', $sent['headers']['Subject']);
+  }
+
+  /**
    * Test that an activity was recorded.
    */
   public function testActivityRecorded() {
