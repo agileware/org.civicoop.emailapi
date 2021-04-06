@@ -325,7 +325,7 @@ function _civicrm_api3_email_send_createTokenProcessor($params, $messageTemplate
   }
 
   // Define message templates.
-  $tokenProc->addMessage('subject', $messageTemplate->msg_subject, 'text/plain');
+  $tokenProc->addMessage('subject', (empty($params['subject']) ? $messageTemplate->msg_subject : $params['subject']), 'text/plain');
   $tokenProc->addMessage('body_html', $messageTemplate->msg_html, 'text/html');
   $tokenProc->addMessage('body_text',
     $messageTemplate->msg_text ? $messageTemplate->msg_text : CRM_Utils_String::htmlToText($messageTemplate->msg_html),
