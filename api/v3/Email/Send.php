@@ -68,6 +68,19 @@ function _civicrm_api3_email_send_spec(&$spec) {
     'type' => CRM_Utils_Type::T_BOOLEAN,
     'api.default' => 1,
   ];
+
+  $spec['activity_details'] = [
+    'title' => 'Activity details',
+    'description' => 'What to include in the details field of the created activity',
+    'type' => CRM_Utils_Type::T_TEXT,
+    'api.default' => 'html,text',
+    'options' => [
+      'html,text' => 'HTML and Text versions of the body',
+      'tplName' => 'Just the name of the message template',
+      'html' => 'Just the HTML version of the body',
+      'text' => 'Just the text version of the body',
+    ],
+  ];
 }
 
 /**
@@ -172,12 +185,29 @@ function civicrm_api3_email_send($params) {
       //create activity for sending e-mail.
       $activityTypeID = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_type_id', 'Email');
 
-      // CRM-6265: save both text and HTML parts in details (if present)
-      if ($html and $text) {
-        $details = "-ALTERNATIVE ITEM 0-\n$html\n-ALTERNATIVE ITEM 1-\n$text\n-ALTERNATIVE END-\n";
-      }
-      else {
+      switch ($params['activity_details']) {
+      case 'html,text':
+        // Legacy default, unchanged. Falls back to just text if no HTML available.
+        // CRM-6265: save both text and HTML parts in details (if present)
+        if ($html and $text) {
+          $details = "-ALTERNATIVE ITEM 0-\n$html\n-ALTERNATIVE ITEM 1-\n$text\n-ALTERNATIVE END-\n";
+        }
+        else {
+          $details = $html ? $html : $text;
+        }
+        break;
+
+      case 'html':
         $details = $html ? $html : $text;
+        break;
+
+      case 'text':
+        $details = $text;
+        break;
+
+      case 'tplName':
+        $details = "Message Template " . $messageTemplates->id . " <em>" . htmlspecialchars($messageTemplates->msg_title) . "</em>";
+        break;
       }
 
       $activityParams = [
