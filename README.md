@@ -20,8 +20,11 @@ Parameters for the api are specified below:
 - `from_email`: **optional** e-mail of the sender (if you provide this value you have also to provide from_name)
 - `alternative_receiver_address`: **optional** alternative receiver address of the e-mail.
 - `case_id`: **optional** adds the e-mail to the case identified by this ID.
-- `create_activity`: **optional** (default: 1) Record a copy of the email
-  sent in an activity
+- `create_activity`: **optional** (default: 1) Record a copy of the email sent in an activity
+- `activity_details`: **optional** (default: html,text) what to include in
+  the details field of the created activity: HTML/Text/both versions, or
+  just the name of the message template (it may be a disk space issue
+  storing a full copy of everything on a busy site).
 
 *It is not possible to specify your own message through the API.*
 
@@ -47,7 +50,10 @@ that's suitable for your needs, and migrate between them should you need to.
 
 - `Email.send` can use more tokens (since v2.0), e.g. activity, case, contribution.
 
-- `Email.send` creates an activity (using core’s Email activity type). This behaviour can be prevented by using the `create_activity` parameter (since !22). `MessageTemplate.send` cannot do this.
+- `Email.send` creates an activity (using core’s Email activity type).
+  This behaviour can be prevented by using the `create_activity` parameter
+  (since !22) (and also see `activity_details`). `MessageTemplate.send` cannot
+  do this.
 
 - `Email.send` provides an Action to be used with the [Action Provider extension](https://lab.civicrm.org/extensions/action-provider) (separate to, but used with [Form Processor](https://lab.civicrm.org/extensions/form-processor/))
 

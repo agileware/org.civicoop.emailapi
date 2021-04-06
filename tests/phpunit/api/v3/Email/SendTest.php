@@ -44,7 +44,7 @@ class api_v3_Email_SendTest extends \PHPUnit\Framework\TestCase implements Headl
 
     // Create a message template. First, dead simple.
     $tpl = civicrm_api3('MessageTemplate', 'create', [
-      'msg_title' => "Fix1",
+      'msg_title' => "Fix1title",
       'msg_subject' => 'Fix1subject {contact.first_name}',
       'msg_text' => 'Fix1text {contact.first_name}',
       'msg_html' => '<p>Fix1html {contact.first_name}</p>',
@@ -145,12 +145,54 @@ class api_v3_Email_SendTest extends \PHPUnit\Framework\TestCase implements Headl
       'template_id' => $this->messageTemplates[0],
     ]);
 
+    // Test default case: HTML and Text versions recorded in Details field.
     $activity = $this->assertEmailActivityCount(1);
-
     $this->assertEquals('Fix1subject Testy', $activity['subject']);
     $this->assertContains('Fix1html Testy', $activity['details']);
     $this->assertContains('Fix1text Testy', $activity['details']);
+    $this->assertNotContains('Fix1title', $activity['details']);
     $completedStatusID = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_status_id', 'Completed');
+    $this->assertEquals($completedStatusID, $activity['status_id']);
+
+    // Test just tplName
+    civicrm_api3('Email', 'send', [
+      'contact_id'  => $this->contactID,
+      'template_id' => $this->messageTemplates[0],
+      'activity_details' => 'tplName',
+    ]);
+    $activity = $this->assertEmailActivityCount(2);
+    $this->assertEquals('Fix1subject Testy', $activity['subject']);
+    // Should not contain the html or text.
+    $this->assertNotContains('Fix1html Testy', $activity['details']);
+    $this->assertNotContains('Fix1text Testy', $activity['details']);
+    // Should contain template name
+    $this->assertContains('Fix1title', $activity['details']);
+    $this->assertEquals($completedStatusID, $activity['status_id']);
+
+    // Test html only.
+    civicrm_api3('Email', 'send', [
+      'contact_id'  => $this->contactID,
+      'template_id' => $this->messageTemplates[0],
+      'activity_details' => 'html',
+    ]);
+    $activity = $this->assertEmailActivityCount(3);
+    $this->assertEquals('Fix1subject Testy', $activity['subject']);
+    $this->assertContains('Fix1html Testy', $activity['details']);
+    $this->assertNotContains('Fix1text Testy', $activity['details']);
+    $this->assertNotContains('Fix1title', $activity['details']);
+    $this->assertEquals($completedStatusID, $activity['status_id']);
+
+    // Test text only.
+    civicrm_api3('Email', 'send', [
+      'contact_id'  => $this->contactID,
+      'template_id' => $this->messageTemplates[0],
+      'activity_details' => 'text',
+    ]);
+    $activity = $this->assertEmailActivityCount(4);
+    $this->assertEquals('Fix1subject Testy', $activity['subject']);
+    $this->assertNotContains('Fix1html Testy', $activity['details']);
+    $this->assertContains('Fix1text Testy', $activity['details']);
+    $this->assertNotContains('Fix1title', $activity['details']);
     $this->assertEquals($completedStatusID, $activity['status_id']);
   }
   /**
@@ -169,7 +211,7 @@ class api_v3_Email_SendTest extends \PHPUnit\Framework\TestCase implements Headl
   }
 
   /**
-   * Check count of activities. Returns first one.
+   * Check count of activities. Returns last one (by ID).
    *
    * @return array|null
    */
@@ -179,9 +221,12 @@ class api_v3_Email_SendTest extends \PHPUnit\Framework\TestCase implements Headl
       'target_id'        => $this->contactID,
       'activity_type_id' => $activityTypeID,
       'sequential'       => 1,
+      'options'          => ['sort' => 'id']
     ]);
     $this->assertEquals($expected, $c['count'], $message);
 
-    return $c['values'][0] ?? NULL;
+    if ($c['count']) {
+      return array_pop($c['values']);
+    }
   }
 }
