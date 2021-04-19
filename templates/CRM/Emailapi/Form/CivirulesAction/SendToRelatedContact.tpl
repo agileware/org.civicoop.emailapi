@@ -7,14 +7,14 @@
     <p>The <strong>Message Template</strong> is where you select which CiviCRM message template will be used to compose the mail. You can create and edit them in <strong>Administer>Communications>Message Templates</strong></p>
     <p>The next section allows you to manipulate where the email will be sent to.<br/>
     By <strong>default</strong> the email will be sent to the <strong>primary email address of the related contact</strong> in question.<br/>
-    You can select which related contacts should receive the e-mail:
+    You can select which related contacts should receive the email:
     <ul>
       <li><strong>All active related contacts</strong>,</li>
       <li><strong>The most recent active related contact</strong>, this will select the contact with the newest start date of the relationship,</li>
       <li>or <strong>The most recent inactive related contact</strong>, this will select the contact with the latest end date of the relationship</li>
     </ul>
     </p>
-      <p>Finally you can specify an emailaddress for the <strong>CC to</strong> (a copy of the email will be sent to this email address and the email address will be visible to the recipient of the email too) or the <strong>BCC to</strong> (a copy of the email will be sent to this email address and the email address will NOT be visible to the recipient of the email too).</p>
+      <p>Finally you can specify an email address for the <strong>CC to</strong> (a copy of the email will be sent to this email address and the email address will be visible to the recipient of the email too) or the <strong>BCC to</strong> (a copy of the email will be sent to this email address and the email address will NOT be visible to the recipient of the email too).</p>
       <p>The sending of the email will also lead to an activity (type <em>Email</em>) being recorded for the contact in question, whatever email address will be used.</p>
     {/ts}
   </div>
@@ -51,7 +51,7 @@
   <div class="crm-section">
     <div class="label">{$form.location_type_id.label}</div>
     <div class="content">{$form.location_type_id.html}</div>
-    <div class="content" id="location_note">{ts}Note: primary e-mail address will be used if location type e-mail address not found{/ts}</div>
+    <div class="content" id="location_note">{ts}Note: primary email address will be used if location type email address not found{/ts}</div>
     <div class="clear"></div>
   </div>
   <div class="crm-section cc">

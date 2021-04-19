@@ -110,7 +110,7 @@ class CRM_Emailapi_Form_CivirulesAction_SendToRolesOnCase extends CRM_Core_Form 
       'placeholder' => E::ts(' - select - ')
     ], TRUE);
     $this->add('checkbox','disable_smarty', E::ts('Disable Smarty'));
-    $this->add('select', 'location_type_id', E::ts('Location Type (if you do not want primary e-mail address)'), $this->getLocationTypes(), FALSE);
+    $this->add('select', 'location_type_id', E::ts('Location Type (if you do not want primary email address)'), $this->getLocationTypes(), FALSE);
     // add buttons
     $this->addButtons([
       ['type' => 'next', 'name' => E::ts('Save'), 'isDefault' => TRUE,],

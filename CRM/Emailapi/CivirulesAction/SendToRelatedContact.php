@@ -28,7 +28,7 @@ class CRM_Emailapi_CivirulesAction_SendToRelatedContact extends CRM_Civirules_Ac
       $params = $actionParams;
       $params['contact_id'] = $related_contact_id;
 
-      // change e-mail address if other location type is used, falling back on primary if set
+      // change email address if other location type is used, falling back on primary if set
       $alternativeAddress = $this->checkAlternativeAddress($params, $related_contact_id);
       if ($alternativeAddress) {
         $params['alternative_receiver_address'] = $alternativeAddress;
@@ -110,7 +110,7 @@ class CRM_Emailapi_CivirulesAction_SendToRelatedContact extends CRM_Civirules_Ac
 
   /**
    * Method to check if an alternative address is required. This is the case if:
-   * - the location type is set, then the e-mail address of the specific location type (if found) is to be used.
+   * - the location type is set, then the email address of the specific location type (if found) is to be used.
    * - if alternative receiver address is set, that is to be used
    *
    * @param array $actionParameters
@@ -198,14 +198,14 @@ class CRM_Emailapi_CivirulesAction_SendToRelatedContact extends CRM_Civirules_Ac
         $locationText = 'location type ' . civicrm_api3('LocationType', 'getvalue', [
             'return' => 'display_name',
             'id' => $params['location_type_id'],
-          ]) . ' with primary e-mail address as fall back';
+          ]) . ' with primary email address as fall back';
       }
       catch (CiviCRM_API3_Exception $ex) {
         $locationText = 'location type ' . $params['location_type_id'];
       }
     }
     else {
-      $locationText = "primary e-mail address";
+      $locationText = "primary email address";
     }
     $to = '';
     $relationship_types = self::getRelationshipTypes();
@@ -225,7 +225,7 @@ class CRM_Emailapi_CivirulesAction_SendToRelatedContact extends CRM_Civirules_Ac
     if (!empty($params['bcc'])) {
       $bcc = ts(' and bcc to %1', [1=>$params['bcc']]);
     }
-    return ts('Send e-mail from "%1 (%2 using %3)" with Template "%4" to %5 %6 %7', [
+    return ts('Send email from "%1 (%2 using %3)" with Template "%4" to %5 %6 %7', [
       1=>$params['from_name'],
       2=>$params['from_email'],
       3=>$locationText,

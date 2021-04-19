@@ -105,13 +105,13 @@ function emailapi_civicrm_managed(&$entities) {
     $select = "SELECT COUNT(*) FROM civirule_action WHERE `name` = 'emailapi_send'";
     $count = CRM_Core_DAO::singleValueQuery($select);
     if ($count == 0) {
-      CRM_Core_DAO::executeQuery("INSERT INTO civirule_action (name, label, class_name, is_active) VALUES('emailapi_send', 'Send E-mail', 'CRM_Emailapi_CivirulesAction_Send', 1);");
+      CRM_Core_DAO::executeQuery("INSERT INTO civirule_action (name, label, class_name, is_active) VALUES('emailapi_send', 'Send Email', 'CRM_Emailapi_CivirulesAction_Send', 1);");
     }
 
     $select = "SELECT COUNT(*) FROM civirule_action WHERE `name` = 'emailapi_send_relationship'";
     $count = CRM_Core_DAO::singleValueQuery($select);
     if ($count == 0) {
-      CRM_Core_DAO::executeQuery("INSERT INTO civirule_action (name, label, class_name, is_active) VALUES('emailapi_send_relationship', 'Send E-mail to a related contact', 'CRM_Emailapi_CivirulesAction_SendToRelatedContact', 1);");
+      CRM_Core_DAO::executeQuery("INSERT INTO civirule_action (name, label, class_name, is_active) VALUES('emailapi_send_relationship', 'Send Email to a related contact', 'CRM_Emailapi_CivirulesAction_SendToRelatedContact', 1);");
     }
   }
 }
