@@ -34,7 +34,7 @@ class CRM_Emailapi_CivirulesAction_SendToRelatedContact extends CRM_Civirules_Ac
         $params['alternative_receiver_address'] = $alternativeAddress;
       }
       $extra_data = (array) $triggerData;
-      $params['extra_data'] = $extra_data["\0CRM_Civirules_TriggerData_TriggerData\0entity_data"];
+      $parameters['extra_data'] = array_change_key_case($extra_data["\0CRM_Civirules_TriggerData_TriggerData\0entity_data"], CASE_LOWER);
       foreach ($params['extra_data'] as $entity => $values) {
         if (isset($values['id'])) {
           $params["${entity}_id"] = $values['id'];

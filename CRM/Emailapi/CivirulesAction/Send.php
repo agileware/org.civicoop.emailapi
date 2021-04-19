@@ -66,7 +66,7 @@ class CRM_Emailapi_CivirulesAction_Send extends CRM_CivirulesActions_Generic_Api
       $parameters['disable_smarty'] = $actionParameters['disable_smarty'];
     }
     $extra_data = (array) $triggerData;
-    $parameters['extra_data'] = $extra_data["\0CRM_Civirules_TriggerData_TriggerData\0entity_data"];
+    $parameters['extra_data'] = array_change_key_case($extra_data["\0CRM_Civirules_TriggerData_TriggerData\0entity_data"], CASE_LOWER);
     foreach ($parameters['extra_data'] as $entity => $values) {
       if (isset($values['id'])) {
         $parameters["${entity}_id"] = $values['id'];
