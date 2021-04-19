@@ -10,7 +10,7 @@ class CRM_Emailapi_Upgrader extends CRM_Emailapi_Upgrader_Base {
   // upgrade tasks. They are executed in order (like Drupal's hook_update_N).
 
   /**
-   * Install CiviRule Action Send E-mail
+   * Install CiviRule Action Send Email
    */
   public function install() {
     // if extension CiviRules installed, add action send email
@@ -50,13 +50,13 @@ class CRM_Emailapi_Upgrader extends CRM_Emailapi_Upgrader_Base {
   }
 
   /**
-   * update class name of the send e-mail action and add the send e-mail to related contact
+   * update class name of the send email action and add the send email to related contact
    */
   public function upgrade_1003() {
     if(civicrm_api3('Extension', 'get', ['full_name' => 'org.civicoop.civirules', 'status' => 'installed'])['count']){
       CRM_Core_DAO::executeQuery("UPDATE civirule_action SET class_name = 'CRM_Emailapi_CivirulesAction_Send' WHERE `name` = 'emailapi_send'");
       CRM_Core_DAO::executeQuery("INSERT INTO civirule_action (name, label, class_name, is_active)
-        VALUES('emailapi_send_relationship', 'Send E-mail to a related contact', 'CRM_Emailapi_CivirulesAction_SendToRelatedContact', 1);"
+        VALUES('emailapi_send_relationship', 'Send Email to a related contact', 'CRM_Emailapi_CivirulesAction_SendToRelatedContact', 1);"
       );
     }
     return true;
@@ -75,7 +75,7 @@ class CRM_Emailapi_Upgrader extends CRM_Emailapi_Upgrader_Base {
 
   public function upgrade_1005() {
     if (civicrm_api3('Extension', 'get', ['full_name' => 'org.civicoop.civirules', 'status' => 'installed'])['count']){
-      CRM_Core_DAO::executeQuery("INSERT INTO civirule_action (name, label, class_name, is_active) VALUES('emailapi_send_rolesoncase', 'Send E-mail to contacts on a case', 'CRM_Emailapi_CivirulesAction_SendToRolesOnCase', 1);");
+      CRM_Core_DAO::executeQuery("INSERT INTO civirule_action (name, label, class_name, is_active) VALUES('emailapi_send_rolesoncase', 'Send Email to contacts on a case', 'CRM_Emailapi_CivirulesAction_SendToRolesOnCase', 1);");
     }
     return true;
   }

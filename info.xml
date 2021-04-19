@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <extension key="org.civicoop.emailapi" type="module">
   <file>emailapi</file>
-  <name>E-mail API</name>
-  <description>API to send an e-mail to a contact</description>
+  <name>Email API</name>
+  <description>API to send an email to a contact</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Jaap Jansma - CiviCooP</author>

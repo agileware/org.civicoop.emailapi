@@ -97,7 +97,7 @@ class CRM_Emailapi_Form_CivirulesAction_SendToRelatedContact extends CRM_Core_Fo
     $this->add('text', 'from_email', E::ts('From Email'), TRUE);
     $this->addRule("from_email", E::ts('Email is not valid.'), 'email');
     $this->add('select', 'relationship_type', E::ts('Relationship Type'), $this->getRelationshipTypes(), TRUE);
-    $this->add('select', 'relationship_option', E::ts('Send e-mail to'), $this->getRelatedOptions(), TRUE);
+    $this->add('select', 'relationship_option', E::ts('Send email to'), $this->getRelatedOptions(), TRUE);
     $this->add('text', 'cc', E::ts('Cc to'));
     $this->addRule("cc", E::ts('Email is not valid.'), 'emailList');
     $this->add('text', 'bcc', E::ts('Bcc to'));
@@ -115,7 +115,7 @@ class CRM_Emailapi_Form_CivirulesAction_SendToRelatedContact extends CRM_Core_Fo
       'placeholder' => E::ts(' - select - '),
     ], TRUE);
     $this->add('checkbox','disable_smarty', E::ts('Disable Smarty'));
-    $this->add('select', 'location_type_id', E::ts('Location Type (if you do not want primary e-mail address)'), $this->getLocationTypes(), FALSE);
+    $this->add('select', 'location_type_id', E::ts('Location Type (if you do not want primary email address)'), $this->getLocationTypes(), FALSE);
     if ($this->hasCase) {
       $this->add('checkbox','file_on_case', E::ts('File Email on Case'));
     }

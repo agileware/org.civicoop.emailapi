@@ -8,7 +8,7 @@
     <p>The next section allows you to manipulate where the email will be sent to. By default it will be sent to all people with a role on the case. But you can restrict it by certain roles.<br/>
     By <strong>default</strong> the email will be sent to the <strong>primary email address of the contact</strong> in question.<br/>
     </p>
-      <p>Finally you can specify an emailaddress for the <strong>CC to</strong> (a copy of the email will be sent to this email address and the email address will be visible to the recipient of the email too) or the <strong>BCC to</strong> (a copy of the email will be sent to this email address and the email address will NOT be visible to the recipient of the email too).</p>
+      <p>Finally you can specify an email address for the <strong>CC to</strong> (a copy of the email will be sent to this email address and the email address will be visible to the recipient of the email too) or the <strong>BCC to</strong> (a copy of the email will be sent to this email address and the email address will NOT be visible to the recipient of the email too).</p>
       <p>The sending of the email will also lead to an activity (type <em>Email</em>) being recorded for the contact in question, whatever email address will be used.</p>
     {/ts}
   </div>
@@ -40,7 +40,7 @@
   <div class="crm-section">
     <div class="label">{$form.location_type_id.label}</div>
     <div class="content">{$form.location_type_id.html}</div>
-    <div class="content" id="location_note">{ts}Note: primary e-mail address will be used if location type e-mail address not found{/ts}</div>
+    <div class="content" id="location_note">{ts}Note: primary email address will be used if location type email address not found{/ts}</div>
     <div class="clear"></div>
   </div>
   <div class="crm-section cc">

@@ -13,7 +13,7 @@
       <li>If you do not select a location type you can <strong>tick</strong> the <strong>Send to Alternative Email Address</strong> box. You will then get the option to enter an alternative email address. Obviously you have to enter a valid email address here.</li>
     </ol>
     </p>
-      <p>Finally you can specify an emailaddress for the <strong>CC to</strong> (a copy of the email will be sent to this email address and the email address will be visible to the recipient of the email too) or the <strong>BCC to</strong> (a copy of the email will be sent to this email address and the email address will NOT be visible to the recipient of the email too).</p>
+      <p>Finally you can specify an email address for the <strong>CC to</strong> (a copy of the email will be sent to this email address and the email address will be visible to the recipient of the email too) or the <strong>BCC to</strong> (a copy of the email will be sent to this email address and the email address will NOT be visible to the recipient of the email too).</p>
       <p>The sending of the email will also lead to an activity (type <em>Email</em>) being recorded for the contact in question, whatever email address will be used.</p>
     {/ts}
   </div>
@@ -40,7 +40,7 @@
   <div class="crm-section">
     <div class="label">{$form.location_type_id.label}</div>
     <div class="content">{$form.location_type_id.html}</div>
-    <div class="content" id="location_note">{ts}Note: primary e-mail address will be used if location type e-mail address not found{/ts}</div>
+    <div class="content" id="location_note">{ts}Note: primary email address will be used if location type email address not found{/ts}</div>
     <div class="clear"></div>
   </div>
   <div class="crm-section hiddenElement alternative_receiver">

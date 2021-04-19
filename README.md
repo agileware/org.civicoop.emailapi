@@ -9,17 +9,17 @@ But it adds support for processing activity tokens which is nice.
 
 ## Description
 
-E-mail API for CiviCRM to send e-mails through the API
+Email API for CiviCRM to send emails through the API
 
-The entity for the E-mail API is Email and the action is Send.
+The entity for the Email API is Email and the action is Send.
 
 Parameters for the api are specified below:
 - `contact_id`: list of contacts IDs to create the PDF Letter (separated by ",")
 - `template_id`: ID of the message template which will be used in the API.
 - `from_name`: **optional** name of the sender (if you provide this value you have also to provide from_email)
-- `from_email`: **optional** e-mail of the sender (if you provide this value you have also to provide from_name)
-- `alternative_receiver_address`: **optional** alternative receiver address of the e-mail.
-- `case_id`: **optional** adds the e-mail to the case identified by this ID.
+- `from_email`: **optional** email of the sender (if you provide this value you have also to provide from_name)
+- `alternative_receiver_address`: **optional** alternative receiver address of the email.
+- `case_id`: **optional** adds the email to the case identified by this ID.
 - `create_activity`: **optional** (default: 1) Record a copy of the email sent in an activity
 - `activity_details`: **optional** (default: html,text) what to include in
   the details field of the created activity: HTML/Text/both versions, or

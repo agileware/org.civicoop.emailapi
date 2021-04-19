@@ -137,15 +137,15 @@ function civicrm_api3_email_send($params) {
     if ($alternativeEmailAddress) {
       /*
        * If an alternative recipient address is given
-       * then send e-mail to that address rather than to
-       * the e-mail address of the contact
+       * then send email to that address rather than to
+       * the email address of the contact
        */
       $toName = '';
       $toEmail = $alternativeEmailAddress;
     }
     elseif ($contact['do_not_email'] || empty($contact['email']) || CRM_Utils_Array::value('is_deceased', $contact) || $contact['on_hold']) {
       /*
-       * Contact is deceased or has opted out from mailings so do not send the e-mail
+       * Contact is deceased or has opted out from mailings so do not send the email
        */
       continue;
     }
@@ -156,7 +156,7 @@ function civicrm_api3_email_send($params) {
 
     // set up the parameters for CRM_Utils_Mail::send
     $mailParams = [
-      'groupName' => 'E-mail from API',
+      'groupName' => 'Email from API',
       'from' => $from,
       'toName' => $toName,
       'toEmail' => $toEmail,
@@ -182,7 +182,7 @@ function civicrm_api3_email_send($params) {
 
     // We are ready to send. Record that we are going to try to send the email.
     if ($params['create_activity']) {
-      //create activity for sending e-mail.
+      //create activity for sending email.
       $activityTypeID = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_type_id', 'Email');
 
       switch ($params['activity_details']) {
@@ -250,7 +250,7 @@ function civicrm_api3_email_send($params) {
     // Try to send the email.
     $result = CRM_Utils_Mail::send($mailParams);
     if (!$result) {
-      throw new API_Exception('Error sending e-mail to ' . $contact['display_name'] . ' <' . $toEmail . '> ');
+      throw new API_Exception('Error sending email to ' . $contact['display_name'] . ' <' . $toEmail . '> ');
     }
 
     if ($params['create_activity']) {
@@ -267,7 +267,7 @@ function civicrm_api3_email_send($params) {
     $returnValues[$contactId] = [
       'contact_id' => $contactId,
       'send' => 1,
-      'status_msg' => "Successfully sent e-mail to {$toEmail}",
+      'status_msg' => "Successfully sent email to {$toEmail}",
     ];
   }
 
