@@ -1,6 +1,9 @@
 # CHANGELOG
 
-## Version 2.2 (not yet released)
+## Version 2.2
+
+* Fixed issue with Send to Related contact action.
+* Fixed issue with Send to role on case action.
 
 ## Version 2.1
 
