@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## Version 2.3 (not yet released)
+
 ## Version 2.2
 
 * Fixed issue with Send to Related contact action.
