@@ -287,6 +287,8 @@ function _civicrm_api3_email_send_getEntityFieldsMap() {
     'contact_id' => 'contactId',
     'contribution_id' => 'contributionId',
     'case_id' => 'caseId',
+    'participant_id' => 'participantId',
+    'event_id' => 'eventId',
   ];
 }
 
@@ -349,6 +351,38 @@ function _civicrm_api3_email_send_createTokenProcessor($params, $messageTemplate
       $messageTemplate->msg_subject = CRM_Utils_Token::replaceContributionTokens($messageTemplate->msg_subject, $contribution, TRUE, $tokens);
       $messageTemplate->msg_html = CRM_Utils_Token::replaceContributionTokens($messageTemplate->msg_html, $contribution, TRUE, $tokens);
       $messageTemplate->msg_text = CRM_Utils_Token::replaceContributionTokens($messageTemplate->msg_text, $contribution, TRUE, $tokens);
+    } catch (Exception $e) {
+      // Do nothing
+    }
+  }
+  if (!empty($params['participant_id'])) {
+    // @fixme: Participant don't (yet) support tokenProcessor
+    $tokens = array_merge_recursive(
+      CRM_Utils_Token::getTokens($messageTemplate->msg_text),
+      CRM_Utils_Token::getTokens($messageTemplate->msg_html),
+      CRM_Utils_Token::getTokens($messageTemplate->msg_subject)
+    );
+    try {
+      $participant = civicrm_api3('Participant', 'getsingle', ['id' => $params['participant_id']]);
+      $messageTemplate->msg_subject = \CRM_Utils_Token::replaceEntityTokens('participant', $participant, $messageTemplate->msg_subject, $tokens);
+      $messageTemplate->msg_html = \CRM_Utils_Token::replaceEntityTokens('participant', $participant, $messageTemplate->msg_html, $tokens);
+      $messageTemplate->msg_text = \CRM_Utils_Token::replaceEntityTokens('participant', $participant, $messageTemplate->msg_text, $tokens);
+    } catch (Exception $e) {
+      // Do nothing
+    }
+  }
+  if (!empty($params['event_id'])) {
+    // @fixme: Event don't (yet) support tokenProcessor
+    $tokens = array_merge_recursive(
+      CRM_Utils_Token::getTokens($messageTemplate->msg_text),
+      CRM_Utils_Token::getTokens($messageTemplate->msg_html),
+      CRM_Utils_Token::getTokens($messageTemplate->msg_subject)
+    );
+    try {
+      $event = civicrm_api3('Event', 'getsingle', ['id' => $params['event_id']]);
+      $messageTemplate->msg_subject = \CRM_Utils_Token::replaceEntityTokens('event', $event, $messageTemplate->msg_subject, $tokens);
+      $messageTemplate->msg_html = \CRM_Utils_Token::replaceEntityTokens('event', $event, $messageTemplate->msg_html, $tokens);
+      $messageTemplate->msg_text = \CRM_Utils_Token::replaceEntityTokens('event', $event, $messageTemplate->msg_text, $tokens);
     } catch (Exception $e) {
       // Do nothing
     }
