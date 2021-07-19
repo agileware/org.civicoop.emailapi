@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## Version 2.4 (not yet released)
+
 ## Version 2.3
 
 * Fixed issue with Event and Participant Tokens.
