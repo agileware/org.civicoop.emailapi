@@ -80,6 +80,32 @@ class CRM_Emailapi_Form_CivirulesAction_Send extends CRM_Core_Form {
     return $return;
   }
 
+
+  /**
+   * Function to get from email addresses
+   *
+   * @return array $return
+   * @access protected
+   */
+  protected function getFromEmails() {
+    $return = ['' => E::ts('-- please select --')];
+
+    try {
+      $fromEmails = civicrm_api3('OptionValue', 'get', [
+        'sequential' => 1,
+        'option_group_id' => "from_email_address",
+        'is_active' => 1,
+      ]);
+
+      foreach ($fromEmails['values'] as $key => $optionValue) {
+        $return[$optionValue['value']] = htmlspecialchars($optionValue['label']);
+      }
+    }
+    catch (CiviCRM_API3_Exception $ex) {
+    }
+    return $return;
+  }
+
   function buildQuickForm() {
 
     $this->setFormTitle();
@@ -113,6 +139,9 @@ class CRM_Emailapi_Form_CivirulesAction_Send extends CRM_Core_Form {
       $this->add('checkbox','file_on_case', E::ts('File Email on Case'));
     }
     $this->assign('has_case', $this->hasCase);
+
+    $this->add('select', 'from_email_option', E::ts('From Email Address'), $this->getFromEmails(), FALSE);
+
     // add buttons
     $this->addButtons([
       ['type' => 'next', 'name' => E::ts('Save'), 'isDefault' => TRUE,],
@@ -162,6 +191,11 @@ class CRM_Emailapi_Form_CivirulesAction_Send extends CRM_Core_Form {
     if (!empty($data['file_on_case'])) {
       $defaultValues['file_on_case'] = TRUE;
     }
+
+    if (!empty($data['from_email_option'])) {
+      $defaultValues['from_email_option'] = $data['from_email_option'];
+    }
+
     return $defaultValues;
   }
 
@@ -176,6 +210,7 @@ class CRM_Emailapi_Form_CivirulesAction_Send extends CRM_Core_Form {
     $data['template_id'] = $this->_submitValues['template_id'];
     $data['disable_smarty'] = $this->_submitValues['disable_smarty'] ?? FALSE;
     $data['location_type_id'] = $this->_submitValues['location_type_id'];
+    $data['from_email_option'] = $this->_submitValues['from_email_option'];
     if (!empty($this->_submitValues['location_type_id'])) {
       $data['alternative_receiver_address'] = '';
     }
