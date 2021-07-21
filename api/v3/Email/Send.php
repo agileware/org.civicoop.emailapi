@@ -81,6 +81,12 @@ function _civicrm_api3_email_send_spec(&$spec) {
       'text' => 'Just the text version of the body',
     ],
   ];
+
+  $spec['from_email_option'] = [
+    'title' => 'From Email Address Option value',
+    'type' => CRM_Utils_Type::T_INT,
+  ];
+
 }
 
 /**
@@ -116,6 +122,21 @@ function civicrm_api3_email_send($params) {
   } elseif (!empty($params['from_email']) || !empty($params['from_name'])) {
     // Why do we insist on this, instead of using the site default where the data is missing?
     throw new API_Exception('You have to provide both from_name and from_email');
+  }
+
+  if (!empty($params['from_email_option'])) {
+    $result = civicrm_api3('OptionValue', 'get', [
+      'sequential' => 1,
+      'option_group_id' => "from_email_address",
+      'value' => $params['from_email_option'],
+    ]);
+
+    if ($result['count'] > 0) {
+      $from = $result['values'][0]['name'];
+    }
+    else {
+      throw new API_Exception('Cannot find from_email_option');
+    }
   }
 
   if (!$messageTemplates->find(TRUE)) {

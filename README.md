@@ -25,6 +25,7 @@ Parameters for the api are specified below:
   the details field of the created activity: HTML/Text/both versions, or
   just the name of the message template (it may be a disk space issue
   storing a full copy of everything on a busy site).
+- `from_email_option`: **optional** option value of email addresses configured in Communications >> From Email Addresses
 
 *It is not possible to specify your own message through the API.*
 
