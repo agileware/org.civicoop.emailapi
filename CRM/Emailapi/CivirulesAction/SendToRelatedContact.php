@@ -36,7 +36,7 @@ class CRM_Emailapi_CivirulesAction_SendToRelatedContact extends CRM_Civirules_Ac
       $extra_data = (array) $triggerData;
       $params['extra_data'] = array_change_key_case($extra_data["\0CRM_Civirules_TriggerData_TriggerData\0entity_data"], CASE_LOWER);
       foreach ($params['extra_data'] as $entity => $values) {
-        if (isset($values['id'])) {
+        if (isset($values['id']) && $entity !== 'contact') {
           $params["${entity}_id"] = $values['id'];
         }
       }
