@@ -170,7 +170,7 @@ class CRM_Emailapi_Form_CivirulesAction_Send extends CRM_Core_Form {
    *
    * @access public
    */
-  public function postProcess() {
+  public function postProcess($data = []) {
     $data['from_name'] = $this->_submitValues['from_name'];
     $data['from_email'] = $this->_submitValues['from_email'];
     $data['template_id'] = $this->_submitValues['template_id'];
