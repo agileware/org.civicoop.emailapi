@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Version 2.4 (not yet released)
+## Version 2.4
 
 * Fixed issue with Case tokens.
 
