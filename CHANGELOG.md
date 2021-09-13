@@ -2,6 +2,8 @@
 
 ## Version 2.4 (not yet released)
 
+* Fixed issue with Case tokens.
+
 ## Version 2.3
 
 * Fixed issue with Event and Participant Tokens.

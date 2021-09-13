@@ -408,6 +408,22 @@ function _civicrm_api3_email_send_createTokenProcessor($params, $messageTemplate
       // Do nothing
     }
   }
+  if (!empty($params['case_id'])) {
+    // @fixme: Case don't (yet) support tokenProcessor
+    $tokens = array_merge_recursive(
+      CRM_Utils_Token::getTokens($messageTemplate->msg_text),
+      CRM_Utils_Token::getTokens($messageTemplate->msg_html),
+      CRM_Utils_Token::getTokens($messageTemplate->msg_subject)
+    );
+    try {
+      $case = civicrm_api3('Case', 'getsingle', ['id' => $params['case_id']]);
+      $messageTemplate->msg_subject = \CRM_Utils_Token::replaceEntityTokens('case', $case, $messageTemplate->msg_subject, $tokens);
+      $messageTemplate->msg_html = \CRM_Utils_Token::replaceEntityTokens('case', $case, $messageTemplate->msg_html, $tokens);
+      $messageTemplate->msg_text = \CRM_Utils_Token::replaceEntityTokens('case', $case, $messageTemplate->msg_text, $tokens);
+    } catch (Exception $e) {
+      // Do nothing
+    }
+  }
 
   // Define message templates.
   $tokenProc->addMessage('subject', (empty($params['subject']) ? $messageTemplate->msg_subject : $params['subject']), 'text/plain');
