@@ -143,18 +143,10 @@ function civicrm_api3_email_send($params) {
     throw new API_Exception('Could not find template with ID: '.$params['template_id']);
   }
 
-  $tokenProc = _civicrm_api3_email_send_createTokenProcessor($params, $messageTemplates);
-  $tokenProc->evaluate();
-
   $returnValues = [];
-  foreach ($tokenProc->getRows() as $tokenRow) {
-    /** @var \Civi\Token\TokenRow $tokenRow */
-    $contactId = $tokenRow->context[_civicrm_api3_email_send_getEntityFieldsMap()['contact_id']];
-    $messageSubject = $tokenRow->render('subject');
-    $html = $tokenRow->render('body_html');
-    $text = $tokenRow->render('body_text');
+  for ($i=0;$i<count($params['contact_id']);$i++) {
+    $contactId = $params['contact_id'][$i];
     $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactId]);
-
     if ($alternativeEmailAddress) {
       /*
        * If an alternative recipient address is given
@@ -174,6 +166,13 @@ function civicrm_api3_email_send($params) {
       $toName = $contact['display_name'];
       $toEmail = $contact['email'];
     }
+
+    $messageSubject = (empty($params['subject']) ? $messageTemplates->msg_subject : $params['subject']);
+    $text = $messageTemplates->msg_text ? $messageTemplates->msg_text : CRM_Utils_String::htmlToText($messageTemplates->msg_html);
+    $html = $messageTemplates->msg_html;
+    $messageSubject = CRM_Emailapi_Utils_Tokens::replaceTokens($contactId, $messageSubject, $params);
+    $html = CRM_Emailapi_Utils_Tokens::replaceTokens($contactId, $html, $params);
+    $text = CRM_Emailapi_Utils_Tokens::replaceTokens($contactId, $text, $params);
 
     // set up the parameters for CRM_Utils_Mail::send
     $mailParams = [
@@ -293,153 +292,4 @@ function civicrm_api3_email_send($params) {
   }
 
   return civicrm_api3_create_success($returnValues, $params, 'Email', 'Send');
-}
-
-/**
- * The field names in $params and in the token context don't exactly match;
- * Until 5.26: https://github.com/civicrm/civicrm-core/pull/17161 and https://github.com/civicrm/civicrm-core/pull/17254
- *
- * @return array
- */
-function _civicrm_api3_email_send_getEntityFieldsMap() {
-  return [
-    // string $api_param_name => string $tokenContextName
-    'activity_id' => 'activityId',
-    'contact_id' => 'contactId',
-    'contribution_id' => 'contributionId',
-    'case_id' => 'caseId',
-    'participant_id' => 'participantId',
-    'event_id' => 'eventId',
-  ];
-}
-
-/**
- * Create an instance of the TokenProcessor. Populate it with
- * - Message templates (from $messageTemplate).
- * - Basic contextual data about each planned message (eg contact ID from $params).
- *
- * @param array $params
- * @param CRM_Core_DAO_MessageTemplate $messageTemplate
- * @return \Civi\Token\TokenProcessor
- */
-function _civicrm_api3_email_send_createTokenProcessor($params, $messageTemplate) {
-  // TODO: In discussion between aydun+totten, we wanted add a general item called 'schema'
-  //   so that we could foreshadow data available in each row. I'm not sure
-  //   this has been finished/merged yet. But this code assumes it's working.
-  // TODO: CRM_Case_Tokens should consume case_id
-  // TODO: CRM_Contribute_Tokens should consume contribution_id; like old call to replaceContributionTokens (https://github.com/civicrm/civicrm-core/pull/16612)
-  // TODO: Email.send previously called replaceComponentTokens(). Determine if that's something we care about.
-
-  $availableEntityFields = _civicrm_api3_email_send_getEntityFieldsMap();
-
-  $activeEntityFields = [];
-  foreach ($availableEntityFields as $paramName => $contextName) {
-    if (isset($params[$paramName])) {
-      $activeEntityFields[$paramName] = $contextName;
-    }
-  }
-
-  // Prepare the processor and general context.
-  $tokenProc = new \Civi\Token\TokenProcessor(\Civi::dispatcher(), [
-    // Unique(ish) identifier for our controller/use-case.
-    'controller' => 'civicrm_api3_email_send',
-
-    // Provide hints about what data will be available for each row.
-    // Ex: 'schema' => ['contactId', 'activityId', 'caseId'],
-    'schema' => array_values($activeEntityFields),
-
-    // Whether to enable Smarty evaluation.
-    'smarty' => ($params['disable_smarty'] ?? FALSE)
-                ? FALSE
-                : (defined('CIVICRM_MAIL_SMARTY') && CIVICRM_MAIL_SMARTY),
-  ]);
-
-  // @todo do we need to call replaceComponentTokens when using tokenProcessor?
-  //   It won't work unless tokens are passed in via $contact array like ['member.id' => 12]
-  // $messageTemplate->msg_subject = CRM_Utils_Token::replaceComponentTokens($messageTemplate->msg_subject, $contact, $tokens, true);
-  // $messageTemplate->msg_html = CRM_Utils_Token::replaceComponentTokens($messageTemplate->msg_html, $contact, $tokens, true);
-  // $messageTemplate->msg_text = CRM_Utils_Token::replaceComponentTokens($messageTemplate->msg_text, $contact, $tokens, true);
-  if (!empty($params['contribution_id'])) {
-    // @fixme: Contributions don't (yet) support tokenProcessor: see https://github.com/civicrm/civicrm-core/pull/16612
-    // get tokens to be replaced
-    $tokens = array_merge_recursive(
-      CRM_Utils_Token::getTokens($messageTemplate->msg_text),
-      CRM_Utils_Token::getTokens($messageTemplate->msg_html),
-      CRM_Utils_Token::getTokens($messageTemplate->msg_subject)
-    );
-    try {
-      $contribution = civicrm_api3('Contribution', 'getsingle', ['id' => $params['contribution_id']]);
-      $messageTemplate->msg_subject = CRM_Utils_Token::replaceContributionTokens($messageTemplate->msg_subject, $contribution, TRUE, $tokens);
-      $messageTemplate->msg_html = CRM_Utils_Token::replaceContributionTokens($messageTemplate->msg_html, $contribution, TRUE, $tokens);
-      $messageTemplate->msg_text = CRM_Utils_Token::replaceContributionTokens($messageTemplate->msg_text, $contribution, TRUE, $tokens);
-    } catch (Exception $e) {
-      // Do nothing
-    }
-  }
-  if (!empty($params['participant_id'])) {
-    // @fixme: Participant don't (yet) support tokenProcessor
-    $tokens = array_merge_recursive(
-      CRM_Utils_Token::getTokens($messageTemplate->msg_text),
-      CRM_Utils_Token::getTokens($messageTemplate->msg_html),
-      CRM_Utils_Token::getTokens($messageTemplate->msg_subject)
-    );
-    try {
-      $participant = civicrm_api3('Participant', 'getsingle', ['id' => $params['participant_id']]);
-      $messageTemplate->msg_subject = \CRM_Utils_Token::replaceEntityTokens('participant', $participant, $messageTemplate->msg_subject, $tokens);
-      $messageTemplate->msg_html = \CRM_Utils_Token::replaceEntityTokens('participant', $participant, $messageTemplate->msg_html, $tokens);
-      $messageTemplate->msg_text = \CRM_Utils_Token::replaceEntityTokens('participant', $participant, $messageTemplate->msg_text, $tokens);
-    } catch (Exception $e) {
-      // Do nothing
-    }
-  }
-  if (!empty($params['event_id'])) {
-    // @fixme: Event don't (yet) support tokenProcessor
-    $tokens = array_merge_recursive(
-      CRM_Utils_Token::getTokens($messageTemplate->msg_text),
-      CRM_Utils_Token::getTokens($messageTemplate->msg_html),
-      CRM_Utils_Token::getTokens($messageTemplate->msg_subject)
-    );
-    try {
-      $event = civicrm_api3('Event', 'getsingle', ['id' => $params['event_id']]);
-      $messageTemplate->msg_subject = \CRM_Utils_Token::replaceEntityTokens('event', $event, $messageTemplate->msg_subject, $tokens);
-      $messageTemplate->msg_html = \CRM_Utils_Token::replaceEntityTokens('event', $event, $messageTemplate->msg_html, $tokens);
-      $messageTemplate->msg_text = \CRM_Utils_Token::replaceEntityTokens('event', $event, $messageTemplate->msg_text, $tokens);
-    } catch (Exception $e) {
-      // Do nothing
-    }
-  }
-  if (!empty($params['case_id'])) {
-    // @fixme: Case don't (yet) support tokenProcessor
-    $tokens = array_merge_recursive(
-      CRM_Utils_Token::getTokens($messageTemplate->msg_text),
-      CRM_Utils_Token::getTokens($messageTemplate->msg_html),
-      CRM_Utils_Token::getTokens($messageTemplate->msg_subject)
-    );
-    try {
-      $case = civicrm_api3('Case', 'getsingle', ['id' => $params['case_id']]);
-      $messageTemplate->msg_subject = \CRM_Utils_Token::replaceEntityTokens('case', $case, $messageTemplate->msg_subject, $tokens);
-      $messageTemplate->msg_html = \CRM_Utils_Token::replaceEntityTokens('case', $case, $messageTemplate->msg_html, $tokens);
-      $messageTemplate->msg_text = \CRM_Utils_Token::replaceEntityTokens('case', $case, $messageTemplate->msg_text, $tokens);
-    } catch (Exception $e) {
-      // Do nothing
-    }
-  }
-
-  // Define message templates.
-  $tokenProc->addMessage('subject', (empty($params['subject']) ? $messageTemplate->msg_subject : $params['subject']), 'text/plain');
-  $tokenProc->addMessage('body_html', $messageTemplate->msg_html, 'text/html');
-  $tokenProc->addMessage('body_text',
-    $messageTemplate->msg_text ? $messageTemplate->msg_text : CRM_Utils_String::htmlToText($messageTemplate->msg_html),
-    'text/plain');
-
-  // Define row data.
-  for ($i=0;$i<count($params['contact_id']);$i++) {
-    $context = [];
-    foreach ($activeEntityFields as $paramName => $contextName) {
-      $context[$contextName] = is_array($params[$paramName]) ? $params[$paramName][$i] : $params[$paramName] ?? NULL;
-    }
-    $tokenProc->addRow()->context($context);
-  }
-
-  return $tokenProc;
 }

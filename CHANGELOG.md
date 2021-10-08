@@ -2,6 +2,8 @@
 
 ## Version 2.5 (not yet released)
 
+* Removed token processor functionality and reverted to 'old' way of token replacement after too many and too long issues with tokens.
+
 ## Version 2.4
 
 * Fixed issue with Case tokens.
