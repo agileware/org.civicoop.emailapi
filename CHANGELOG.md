@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## Version 2.5 (not yet released)
+## Version 2.6
+
+* Fixed issue with contact tokens (#21)
+
+## Version 2.5
 
 * Removed token processor functionality and reverted to 'old' way of token replacement after too many and too long issues with tokens.
 
