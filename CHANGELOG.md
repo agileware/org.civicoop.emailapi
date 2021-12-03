@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## Version 2.7 (not yet released)
+
 ## Version 2.6
 
 * Fixed issue with contact tokens (#21)
