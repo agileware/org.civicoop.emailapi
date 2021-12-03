@@ -42,6 +42,9 @@ class CRM_Emailapi_Utils_Tokens {
     \CRM_Utils_Hook::tokenValues($contactHookArray, [$contactId], NULL, $messageTokens);
     // Now update the original array.
     $contact = $contactHookArray[$contactId];
+    if (is_array($contact['contact_id'])) {
+      $contact['contact_id'] = reset($contact['contact_id']);
+    }
 
     $domainId = \CRM_Core_BAO_Domain::getDomain();
     $tokenHtml = \CRM_Utils_Token::replaceDomainTokens($message, $domainId, TRUE, $messageTokens, TRUE);
