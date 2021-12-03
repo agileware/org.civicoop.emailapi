@@ -17,61 +17,34 @@ class CRM_Emailapi_Utils_Tokens {
    * @return string
    */
   public static function replaceTokens($contactId, $message, $contactData=array()) {
-    $tokenCategories = self::getTokenCategories();
-    $messageTokens = \CRM_Utils_Token::getTokens($message);
-    $returnProperties = [
-      'sort_name' => 1,
-      'email' => 1,
-      'address' => 1,
-      'do_not_email' => 1,
-      'is_deceased' => 1,
-      'on_hold' => 1,
-      'display_name' => 1,
-    ];
-    if (isset($messageTokens['contact']) && is_array($messageTokens['contact'])) {
-      foreach ($messageTokens['contact'] as $prop) {
-        $returnProperties[$prop] = 1;
-      }
-    }
-    $contact = self::getTokenDetails($contactId, $returnProperties);
-    foreach($contactData as $key => $val) {
-      $contact[$key] = $val;
+    // Add the entities we want rendered into the schema, and record their primary keys.
+    $schema[] = 'contactId';
+    $context['contactId'] = $contactId;
+    foreach ($contactData['extra_data'] as $entity => $entityData) {
+      $schema[] = "{$entity}Id";
+      $context["{$entity}Id"] = $contactData["{$entity}_id"];
+      $context[$entity] = $entityData;
     }
 
-    $contactHookArray[$contactId] = $contact;
-    \CRM_Utils_Hook::tokenValues($contactHookArray, [$contactId], NULL, $messageTokens);
-    // Now update the original array.
-    $contact = $contactHookArray[$contactId];
-    if (is_array($contact['contact_id'])) {
-      $contact['contact_id'] = reset($contact['contact_id']);
+    $useSmarty = (bool) (defined('CIVICRM_MAIL_SMARTY') && CIVICRM_MAIL_SMARTY);
+    $tokenProcessor = new \Civi\Token\TokenProcessor(\Civi::dispatcher(), [
+      'controller' => __CLASS__,
+      'schema' => $schema,
+      'smarty' => $useSmarty,
+    ]);
+
+    // Populate the token processor.
+    $tokenProcessor->addMessage('messageSubject', $message['messageSubject'], 'text/plain');
+    $tokenProcessor->addMessage('html', $message['html'], 'text/html');
+    $tokenProcessor->addMessage('text', $message['text'], 'text/plain');
+    $tokenProcessor->addRow($context);
+    // Evaluate and render.
+    $tokenProcessor->evaluate();
+    foreach (['messageSubject', 'html', 'text'] as $component) {
+      $rendered[$component] = $tokenProcessor->getRow(0)->render($component);
     }
 
-    $domainId = \CRM_Core_BAO_Domain::getDomain();
-    $tokenHtml = \CRM_Utils_Token::replaceDomainTokens($message, $domainId, TRUE, $messageTokens, TRUE);
-    $tokenHtml = \CRM_Utils_Token::replaceContactTokens($tokenHtml, $contact, FALSE, $messageTokens, FALSE, TRUE);
-    $tokenHtml = \CRM_Utils_Token::replaceComponentTokens($tokenHtml, $contact, $messageTokens, TRUE);
-    $tokenHtml = \CRM_Utils_Token::replaceHookTokens($tokenHtml, $contact, $tokenCategories, TRUE);
-    if (isset($contactData['case_id']) && !empty($contactData['case_id'])) {
-      $tokenHtml = \CRM_Utils_Token::replaceCaseTokens($contactData['case_id'], $tokenHtml, $messageTokens);
-    }
-    if (isset($contactData['contribution_id']) && !empty($contactData['contribution_id'])) {
-      $contribution = civicrm_api3('Contribution', 'getsingle', ['id' => $contactData['contribution_id']]);
-      $tokenHtml = \CRM_Utils_Token::replaceContributionTokens($tokenHtml, $contribution, TRUE, $messageTokens);
-    }
-    if (isset($contactData['activity_id']) && !empty($contactData['activity_id'])) {
-      $activity = civicrm_api3('Activity', 'getsingle', ['id' => $contactData['activity_id']]);
-      $tokenHtml = CRM_Utils_Token::replaceEntityTokens('activity', $activity, $tokenHtml, $messageTokens);
-    }
-    \CRM_Utils_Token::replaceGreetingTokens($tokenHtml, $contactData, $contactId);
-
-    if (defined('CIVICRM_MAIL_SMARTY') && CIVICRM_MAIL_SMARTY) {
-      $smarty = \CRM_Core_Smarty::singleton();
-      // also add the contact tokens to the template
-      $smarty->assign_by_ref('contact', $contact);
-      $tokenHtml = $smarty->fetch("string:$tokenHtml");
-    }
-
-    return $tokenHtml;
+    return $rendered;
   }
 
   /**
