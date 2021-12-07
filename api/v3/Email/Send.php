@@ -167,12 +167,10 @@ function civicrm_api3_email_send($params) {
       $toEmail = $contact['email'];
     }
 
-    $messageSubject = (empty($params['subject']) ? $messageTemplates->msg_subject : $params['subject']);
-    $text = $messageTemplates->msg_text ? $messageTemplates->msg_text : CRM_Utils_String::htmlToText($messageTemplates->msg_html);
-    $html = $messageTemplates->msg_html;
-    $messageSubject = CRM_Emailapi_Utils_Tokens::replaceTokens($contactId, $messageSubject, $params);
-    $html = CRM_Emailapi_Utils_Tokens::replaceTokens($contactId, $html, $params);
-    $text = CRM_Emailapi_Utils_Tokens::replaceTokens($contactId, $text, $params);
+    $message['messageSubject'] = (empty($params['subject']) ? $messageTemplates->msg_subject : $params['subject']);
+    $message['text'] = $messageTemplates->msg_text ? $messageTemplates->msg_text : CRM_Utils_String::htmlToText($messageTemplates->msg_html);
+    $message['html'] = $messageTemplates->msg_html;
+    list('messageSubject' => $messageSubject, 'html' => $html, 'text' => $text) = CRM_Emailapi_Utils_Tokens::replaceTokens($contactId, $message, $params);
 
     // set up the parameters for CRM_Utils_Mail::send
     $mailParams = [
