@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## Version 2.8 (not yet released)
+
 ## Version 2.7
 
 * Implemented a much simpler solution of the token processor (see #21 and !43)
