@@ -80,4 +80,11 @@ class CRM_Emailapi_Upgrader extends CRM_Emailapi_Upgrader_Base {
     return true;
   }
 
+  public function upgrade_1006() {
+    if (civicrm_api3('Extension', 'get', ['full_name' => 'org.civicoop.civirules', 'status' => 'installed'])['count']){
+      CRM_Core_DAO::executeQuery("INSERT INTO civirule_action (name, label, class_name, is_active) VALUES('emailapi_send_contactreference', 'Send E-mail to a contact reference', 'CRM_Emailapi_CivirulesAction_SendToContactReference', 1);");
+    }
+    return true;
+  }
+
 }
