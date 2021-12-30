@@ -91,18 +91,20 @@ class CRM_Emailapi_Form_CivirulesAction_Send extends CRM_Core_Form {
     $return = ['' => E::ts('-- please select --')];
 
     try {
-      $fromEmails = civicrm_api3('OptionValue', 'get', [
-        'sequential' => 1,
-        'option_group_id' => "from_email_address",
-        'is_active' => 1,
-      ]);
+      $fromEmails = \Civi\Api4\OptionValue::get(FALSE)
+        ->addSelect('value', 'label')
+        ->addWhere('option_group_id:name', '=', 'from_email_address')
+        ->addWhere('is_active', '=', TRUE)
+        ->addOrderBy('value', 'ASC')
+        ->execute();
 
-      foreach ($fromEmails['values'] as $key => $optionValue) {
-        $return[$optionValue['value']] = htmlspecialchars($optionValue['label']);
+      foreach ($fromEmails as $optionValue) {
+        $return[(int) $optionValue['value']] = htmlspecialchars($optionValue['label']);
       }
     }
     catch (CiviCRM_API3_Exception $ex) {
     }
+    ksort($return);
     return $return;
   }
 
