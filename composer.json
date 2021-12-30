@@ -1,0 +1,4 @@
+{
+    "name": "civicrm/emailapi",
+    "description": "API to send an email to a contact"
+}
