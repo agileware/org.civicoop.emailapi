@@ -2,6 +2,14 @@
 
 ## Version 2.8 (not yet released)
 
+* [!32](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/32) Pass through ID of email Activity with mail params.
+* [!34](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/34) Support contribution tokens on CiviRules 2.23+.
+* [!42](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/42) From email improvements.
+* [!40](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/40) Add action "Send to contact reference".
+* [!39](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/39) Don't overwrite contact ID when trigger is contact-based.
+* [!31](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/31) Link to the 'Edit MessageTemplate' in action description.
+* [!41](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/41) Add composer's package name.
+
 ## Version 2.7
 
 * Implemented a much simpler solution of the token processor (see #21 and !43)
