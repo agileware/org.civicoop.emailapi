@@ -131,7 +131,9 @@ class CRM_Emailapi_CivirulesAction_Send extends CRM_CivirulesActions_Generic_Api
     $messageTemplates->id = $params['template_id'];
     $messageTemplates->is_active = true;
     if ($messageTemplates->find(TRUE)) {
-      $template = $messageTemplates->msg_title;
+      $template = "<a href='"
+        . CRM_Utils_System::url('civicrm/admin/messageTemplates/add', ['action' => 'update', 'id' => $messageTemplates->id, 'reset' => 1])
+        . "'>$messageTemplates->msg_title</a>";
     }
     if (isset($params['location_type_id']) && !empty($params['location_type_id'])) {
       try {
