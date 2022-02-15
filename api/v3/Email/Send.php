@@ -57,7 +57,7 @@ function _civicrm_api3_email_send_spec(&$spec) {
 
   // Copy from MessageTemplate.send API
   $spec['disable_smarty'] = [
-    'description' => 'Disable Smarty. Normal CiviMail tokens are still supported. By default Smarty is enabled if configured by CIVICRM_MAIL_SMARTY.' ,
+    'description' => 'Disable Smarty. Normal CiviMail tokens are still supported. By default Smarty is enabled if configured by CIVICRM_MAIL_SMARTY.',
     'title' => 'Disable Smarty',
     'type' => CRM_Utils_Type::T_BOOLEAN,
   ];
@@ -119,7 +119,8 @@ function civicrm_api3_email_send($params) {
   if (!empty($params['from_email']) && !empty($params['from_name'])) {
     // If both an email and a name are provided, use those as the from header.
     $from = '"' . $params['from_name'] . '" <' . $params['from_email'] . '>';
-  } elseif (!empty($params['from_email']) || !empty($params['from_name'])) {
+  }
+  elseif (!empty($params['from_email']) || !empty($params['from_name'])) {
     // Why do we insist on this, instead of using the site default where the data is missing?
     throw new API_Exception('You have to provide both from_name and from_email');
   }
@@ -140,11 +141,11 @@ function civicrm_api3_email_send($params) {
   }
 
   if (!$messageTemplates->find(TRUE)) {
-    throw new API_Exception('Could not find template with ID: '.$params['template_id']);
+    throw new API_Exception('Could not find template with ID: ' . $params['template_id']);
   }
 
   $returnValues = [];
-  for ($i=0;$i<count($params['contact_id']);$i++) {
+  for ($i = 0; $i < count($params['contact_id']); $i++) {
     $contactId = $params['contact_id'][$i];
     $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactId]);
     if ($alternativeEmailAddress) {
@@ -197,35 +198,34 @@ function civicrm_api3_email_send($params) {
       $mailParams['bcc'] = $params['bcc'];
     }
 
-
     // We are ready to send. Record that we are going to try to send the email.
     if ($params['create_activity']) {
       //create activity for sending email.
       $activityTypeID = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_type_id', 'Email');
 
       switch ($params['activity_details']) {
-      case 'html,text':
-        // Legacy default, unchanged. Falls back to just text if no HTML available.
-        // CRM-6265: save both text and HTML parts in details (if present)
-        if ($html and $text) {
-          $details = "-ALTERNATIVE ITEM 0-\n$html\n-ALTERNATIVE ITEM 1-\n$text\n-ALTERNATIVE END-\n";
-        }
-        else {
+        case 'html,text':
+          // Legacy default, unchanged. Falls back to just text if no HTML available.
+          // CRM-6265: save both text and HTML parts in details (if present)
+          if ($html and $text) {
+            $details = "-ALTERNATIVE ITEM 0-\n$html\n-ALTERNATIVE ITEM 1-\n$text\n-ALTERNATIVE END-\n";
+          }
+          else {
+            $details = $html ? $html : $text;
+          }
+          break;
+
+        case 'html':
           $details = $html ? $html : $text;
-        }
-        break;
+          break;
 
-      case 'html':
-        $details = $html ? $html : $text;
-        break;
+        case 'text':
+          $details = $text;
+          break;
 
-      case 'text':
-        $details = $text;
-        break;
-
-      case 'tplName':
-        $details = "Message Template " . $messageTemplates->id . " <em>" . htmlspecialchars($messageTemplates->msg_title) . "</em>";
-        break;
+        case 'tplName':
+          $details = "Message Template " . $messageTemplates->id . " <em>" . htmlspecialchars($messageTemplates->msg_title) . "</em>";
+          break;
       }
 
       $activityParams = [
@@ -244,7 +244,7 @@ function civicrm_api3_email_send($params) {
       $activityTargetParams = [
         'activity_id' => $activity['id'],
         'contact_id' => $contactId,
-        'record_type_id' => $targetID
+        'record_type_id' => $targetID,
       ];
       CRM_Activity_BAO_ActivityContact::create($activityTargetParams);
 
@@ -282,7 +282,6 @@ function civicrm_api3_email_send($params) {
       ];
       civicrm_api3('Activity', 'create', $activityParams);
     }
-
 
     $returnValues[$contactId] = [
       'contact_id' => $contactId,
