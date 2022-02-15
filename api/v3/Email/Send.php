@@ -133,7 +133,7 @@ function civicrm_api3_email_send($params) {
     ]);
 
     if ($result['count'] > 0) {
-      $from = $result['values'][0]['name'];
+      $from = $result['values'][0]['label'];
     }
     else {
       throw new API_Exception('Cannot find from_email_option');
