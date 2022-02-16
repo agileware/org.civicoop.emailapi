@@ -2,6 +2,7 @@
 
 ## Version 2.8 (not yet released)
 
+* [!44](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/44) Bug in from_email_option.
 * [!32](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/32) Pass through ID of email Activity with mail params.
 * [!34](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/34) Support contribution tokens on CiviRules 2.23+.
 * [!42](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/42) From email improvements.
