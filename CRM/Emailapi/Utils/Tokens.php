@@ -1,4 +1,7 @@
 <?php
+
+use Civi\Token\TokenProcessor;
+
 /**
  * @author Jaap Jansma <jaap.jansma@civicoop.org>
  * @license AGPL-3.0
@@ -10,13 +13,13 @@ class CRM_Emailapi_Utils_Tokens {
    * Returns a processed message. Meaning that all tokens are replaced with their value.
    * This message could then be used to generate the PDF.
    *
-   * @param $contactId
-   * @param $message
+   * @param int $contactId
+   * @param array $message
    * @param array $contactData
    *
-   * @return string
+   * @return string[]
    */
-  public static function replaceTokens($contactId, $message, $contactData=array()) {
+  public static function replaceTokens(int $contactId, array $message, array $contactData=[]): array {
     // Add the entities we want rendered into the schema, and record their primary keys.
     $schema[] = 'contactId';
     $context['contactId'] = $contactId;
@@ -26,8 +29,8 @@ class CRM_Emailapi_Utils_Tokens {
       $context[$entity] = $entityData;
     }
 
-    $useSmarty = (bool) (defined('CIVICRM_MAIL_SMARTY') && CIVICRM_MAIL_SMARTY);
-    $tokenProcessor = new \Civi\Token\TokenProcessor(\Civi::dispatcher(), [
+    $useSmarty = (defined('CIVICRM_MAIL_SMARTY') && CIVICRM_MAIL_SMARTY);
+    $tokenProcessor = new TokenProcessor(\Civi::dispatcher(), [
       'controller' => __CLASS__,
       'schema' => $schema,
       'smarty' => $useSmarty,
@@ -61,6 +64,13 @@ class CRM_Emailapi_Utils_Tokens {
     return \Civi::$statics[__CLASS__]['token_categories'];
   }
 
+  /**
+   * @param $contact_id
+   * @param $returnProperties
+   *
+   * @return mixed
+   * @throws \CRM_Core_Exception
+   */
   protected static function getTokenDetails($contact_id, $returnProperties=NULL) {
     $params = [];
     $params[] = [
