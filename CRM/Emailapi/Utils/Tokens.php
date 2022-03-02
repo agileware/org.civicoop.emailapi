@@ -29,7 +29,11 @@ class CRM_Emailapi_Utils_Tokens {
       $context[$entity] = $entityData;
     }
 
-    $useSmarty = (defined('CIVICRM_MAIL_SMARTY') && CIVICRM_MAIL_SMARTY);
+    // Whether to enable Smarty evaluation.
+    $useSmarty = ($params['disable_smarty'] ?? FALSE)
+      ? FALSE
+      : (defined('CIVICRM_MAIL_SMARTY') && CIVICRM_MAIL_SMARTY);
+
     $tokenProcessor = new TokenProcessor(\Civi::dispatcher(), [
       'controller' => __CLASS__,
       'schema' => $schema,
