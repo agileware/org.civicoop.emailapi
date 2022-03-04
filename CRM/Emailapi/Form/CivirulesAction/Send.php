@@ -113,8 +113,8 @@ class CRM_Emailapi_Form_CivirulesAction_Send extends CRM_Core_Form {
     $this->setFormTitle();
     $this->registerRule('emailList', 'callback', 'emailList', 'CRM_Utils_Rule');
     $this->add('hidden', 'rule_action_id');
-    $this->add('text', 'from_name', E::ts('From Name'), TRUE);
-    $this->add('text', 'from_email', E::ts('From Email'), TRUE);
+    $this->add('text', 'from_name', E::ts('From Name'));
+    $this->add('text', 'from_email', E::ts('From Email'));
     $this->addRule("from_email", E::ts('Email is not valid.'), 'email');
     $this->add('checkbox','alternative_receiver', E::ts('Send to Alternative Email Address'));
     $this->add('text', 'alternative_receiver_address', E::ts('Alternative Email Address'));
@@ -136,13 +136,13 @@ class CRM_Emailapi_Form_CivirulesAction_Send extends CRM_Core_Form {
       'placeholder' => E::ts(' - select - ')
     ], TRUE);
     $this->add('checkbox','disable_smarty', E::ts('Disable Smarty'));
-    $this->add('select', 'location_type_id', E::ts('Location Type (if you do not want primary email address)'), $this->getLocationTypes(), FALSE);
+    $this->add('select', 'location_type_id', E::ts('Location Type (if you do not want primary email address)'), $this->getLocationTypes());
     if ($this->hasCase) {
       $this->add('checkbox','file_on_case', E::ts('File Email on Case'));
     }
     $this->assign('has_case', $this->hasCase);
 
-    $this->add('select', 'from_email_option', E::ts('From Email Address'), $this->getFromEmails(), FALSE);
+    $this->add('select', 'from_email_option', E::ts('From Email Address'), $this->getFromEmails());
 
     // add buttons
     $this->addButtons([

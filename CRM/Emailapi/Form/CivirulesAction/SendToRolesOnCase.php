@@ -16,7 +16,7 @@ class CRM_Emailapi_Form_CivirulesAction_SendToRolesOnCase extends CRM_Emailapi_F
    */
   function buildQuickForm() {
     parent::buildQuickForm();
-    $this->add('select', 'relationship_type', E::ts('Restrict to Roles'), $this->getRelationshipTypes(), FALSE);
+    $this->add('select', 'relationship_type', E::ts('Restrict to Roles'), $this->getRelationshipTypes());
   }
 
   /**
