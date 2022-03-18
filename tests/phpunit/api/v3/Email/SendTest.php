@@ -1,4 +1,5 @@
 <?php
+use Civi\Token\TokenProcessor;
 
 use Civi\Test\HeadlessInterface;
 use Civi\Test\HookInterface;
@@ -73,6 +74,7 @@ class api_v3_Email_SendTest extends \PHPUnit\Framework\TestCase implements Headl
       'email' => 'testy@example.org',
       'contact_type' => 'Individual',
     ])['id'];
+
   }
 
   /**
@@ -133,6 +135,95 @@ class api_v3_Email_SendTest extends \PHPUnit\Framework\TestCase implements Headl
     $this->assertEquals('Custom subject Testy', $sent['headers']['Subject']);
   }
 
+  /**
+   *
+   * This test documents how to specify non-contact entities you want to use tokens for.
+   *
+   * This is not strictly testing the api, but instead it is testing the shared
+   * tokenising function called by the send api.
+   */
+  public function testReplaceTokens() {
+
+    // Add a special character in the first names.
+    \Civi\Api4\Contact::update(FALSE)
+      ->addValue('first_name', 'Me & Thee')
+      ->addWhere('id', '=', $this->contactID)
+      ->execute();
+
+    // Add a contribution recur.
+    $contributionRecur = \Civi\Api4\ContributionRecur::create(FALSE)
+      ->addValue('contact_id', $this->contactID)
+      ->addValue('financial_type_id', 1)
+      ->addValue('amount', 1)
+      ->addValue('start_date', '2022-01-01')
+      ->addValue('contribution_status_id:name', 'In Progress')
+      ->execute()->first();
+
+    $contribution = \Civi\Api4\Contribution::create(FALSE)
+      ->addValue('contact_id', $this->contactID)
+      ->addValue('contribution_recur_id', $contributionRecur['id'])
+      ->addValue('financial_type_id', 1)
+      ->addValue('total_amount', 1)
+      ->addValue('receive_date', 'now')
+      ->addValue('contribution_status_id:name', 'Completed')
+      ->execute()->first();
+    $contributionID = $contribution['id'];
+
+    // Email.send API parameters:
+    $params = [
+      'contact_id' => [$this->contactID],
+      'extra_data' => [
+        // entity_type => entity data array
+        'contribution' => $contribution,
+        'contribution_recur' => $contributionRecur,
+      ],
+      // Note that we MUST also add entity_id type IDs here.
+      'contribution_id' => $contributionID,
+      'contribution_recur_id' => $contributionRecur['id'],
+    ];
+    $message['messageSubject'] = 'subject {contact.first_name} {contact.last_name}';
+    $message['html'] = 'html {contact.first_name} {contact.last_name}';
+    $message['text'] = 'text {contact.first_name} {contact.last_name} {contribution.total_amount} {contribution_recur.start_date}';
+
+    list('messageSubject' => $messageSubject, 'html' => $html, 'text' => $text) = CRM_Emailapi_Utils_Tokens::replaceTokens($this->contactID, $message, $params);
+    // Subject is simple.
+    $this->assertEquals('subject Me & Thee McTestFace', $messageSubject);
+    // We want to ensure the & got encoded
+    $this->assertEquals('html Me &amp; Thee McTestFace', $html);
+    // Check that other entities got handled.
+    $this->assertEquals("text Me & Thee McTestFace $1.00 January 1st, 2022", $text);
+  }
+
+  //
+  // This test really just documents how Civi core (5.46 at least) works.
+  //
+  // public function testTokenProcessor() {
+  //   $contribution = \Civi\Api4\Contribution::create(FALSE)
+  //     ->addValue('contact_id', $this->contactID)
+  //     ->addValue('financial_type_id', 1)
+  //     ->addValue('total_amount', 1)
+  //     ->addValue('receive_date', 'now')
+  //     ->addValue('contribution_status_id:name', 'Completed')
+  //     ->execute()->first();
+  //   $contributionID = $contribution['id'];
+
+  //   $tokenProcessor = new TokenProcessor(\Civi::dispatcher(), [
+  //     'controller' => __CLASS__,
+  //     'schema' => ['contributionId'],
+  //     'smarty' => 0,
+  //   ]);
+
+  //   // Populate the token processor.
+  //   $tokenProcessor->addMessage('text', '{contribution.id}', 'text/plain');
+  //   $row = $tokenProcessor->addRow([
+  //       'contributionId' => $contributionID,
+  //     ]);
+  //   // Evaluate and render.
+  //   $tokenProcessor->evaluate();
+  //   $rendered = $row->render('text');
+  //   $this->assertEquals($contributionID, $rendered);
+
+  // }
   /**
    * Test that an activity was recorded.
    */
