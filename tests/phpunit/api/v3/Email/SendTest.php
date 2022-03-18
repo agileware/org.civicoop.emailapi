@@ -215,7 +215,7 @@ class api_v3_Email_SendTest extends \PHPUnit\Framework\TestCase implements Headl
    *
    * @return array|null
    */
-  protected function assertEmailActivityCount(int $expected, $message=NULL) {
+  protected function assertEmailActivityCount(int $expected, $message='') {
     $activityTypeID = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_type_id', 'Email');
     $c = civicrm_api3('Activity', 'get', [
       'target_id'        => $this->contactID,
