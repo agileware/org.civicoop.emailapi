@@ -171,4 +171,12 @@ class CRM_Emailapi_CivirulesAction_Send extends CRM_CivirulesActions_Generic_Api
       7 => $bcc
     ]);
   }
+  /**
+   * alterApiParameters is a protected method, defined by the Civirules
+   * extension and as such we cannot make it public. The public method below
+   * exposes that function enabling us to have phpunit tests for it.
+   */
+  public function alterApiParametersForTesting($parameters, CRM_Civirules_TriggerData_TriggerData $triggerData) {
+    return $this->alterApiParameters($parameters, $triggerData);
+  }
 }
