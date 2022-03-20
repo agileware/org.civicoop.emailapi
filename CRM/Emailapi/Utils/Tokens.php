@@ -13,6 +13,17 @@ class CRM_Emailapi_Utils_Tokens {
    * Returns a processed message. Meaning that all tokens are replaced with their value.
    * This message could then be used to generate the PDF.
    *
+   * Re: non-contact entities to be used for tokens, this requires, for an entity called 'x'
+   *
+   * 1. $contactData['extra_data']['x'] => ['id' => 123, ... ]
+   * 2. $contactData['x_id'] = 123
+   *
+   * From which it will extract arguments for TokenProcessor as follows:
+   *
+   * 1. 'xId' as an item in the $schema for TokenProcessor
+   * 2. A key 'x' in the $context for TokenProcessor (the row data) with ['id' => 123, ...]
+   * 3. A key 'xId' in the $context for TokenProcessor (the row data) => 123
+   *
    * @param int $contactId
    * @param array $message
    * @param array $contactData
@@ -23,7 +34,7 @@ class CRM_Emailapi_Utils_Tokens {
     // Add the entities we want rendered into the schema, and record their primary keys.
     $schema[] = 'contactId';
     $context['contactId'] = $contactId;
-    foreach ($contactData['extra_data'] as $entity => $entityData) {
+    foreach ($contactData['extra_data'] ?? [] as $entity => $entityData) {
       $schema[] = "{$entity}Id";
       $context["{$entity}Id"] = $contactData["{$entity}_id"];
       $context[$entity] = $entityData;
@@ -44,11 +55,11 @@ class CRM_Emailapi_Utils_Tokens {
     $tokenProcessor->addMessage('messageSubject', $message['messageSubject'], 'text/plain');
     $tokenProcessor->addMessage('html', $message['html'], 'text/html');
     $tokenProcessor->addMessage('text', $message['text'], 'text/plain');
-    $tokenProcessor->addRow($context);
+    $row = $tokenProcessor->addRow($context);
     // Evaluate and render.
     $tokenProcessor->evaluate();
     foreach (['messageSubject', 'html', 'text'] as $component) {
-      $rendered[$component] = $tokenProcessor->getRow(0)->render($component);
+      $rendered[$component] = $row->render($component);
     }
 
     return $rendered;
