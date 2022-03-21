@@ -65,11 +65,21 @@ class CRM_Emailapi_CivirulesAction_Send extends CRM_CivirulesActions_Generic_Api
     if (!empty($actionParameters['disable_smarty'])) {
       $parameters['disable_smarty'] = $actionParameters['disable_smarty'];
     }
-    $extra_data = (array) $triggerData;
-    $parameters['extra_data'] = array_change_key_case($extra_data["\0CRM_Civirules_TriggerData_TriggerData\0entity_data"], CASE_LOWER);
-    foreach ($parameters['extra_data'] as $entity => $values) {
-      if (isset($values['id']) && $entity !== 'contact') {
-        $parameters[mb_strtolower("${entity}_id")] = $values['id'];
+    $extra_data = ((array) $triggerData)["\0CRM_Civirules_TriggerData_TriggerData\0entity_data"] ?? [];
+    $parameters['extra_data'] = [];
+    foreach ($extra_data as $entityCamelCase => $entityData) {
+      // Convert Foo to foo and FooBar to foo_bar
+      $entity_snake_case = mb_strtolower(preg_replace(
+        '/(?<=\d)(?=[A-Za-z])|(?<=[A-Za-z])(?=\d)|(?<=[a-z])(?=[A-Z])/',
+        '_', $entityCamelCase));
+      // Copy the data to extra_data under the lowercase snake case name key.
+      $parameters['extra_data'][$entity_snake_case] = $entityData;
+      // For non-contact entities, create a top level ..._id key
+      if (isset($entityData['id']) && $entity_snake_case !== 'contact') {
+        $parameters[$entity_snake_case . '_id'] = $entityData['id'];
+        // Note: CRM_Emailapi_Utils_Tokens will again change this key from
+        // foo_bar_id to foo_barId. Despite looking wrong, this is correct
+        // in terms of the token processor's needs.
       }
     }
     return $parameters;
@@ -170,5 +180,13 @@ class CRM_Emailapi_CivirulesAction_Send extends CRM_CivirulesActions_Generic_Api
       6 => $cc,
       7 => $bcc
     ]);
+  }
+  /**
+   * alterApiParameters is a protected method, defined by the Civirules
+   * extension and as such we cannot make it public. The public method below
+   * exposes that function enabling us to have phpunit tests for it.
+   */
+  public function alterApiParametersForTesting($parameters, CRM_Civirules_TriggerData_TriggerData $triggerData) {
+    return $this->alterApiParameters($parameters, $triggerData);
   }
 }
