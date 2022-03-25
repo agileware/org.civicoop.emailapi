@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Version 2.8 (not yet released)
+## Version 2.8
 
 * [!44](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/44) Bug in from_email_option.
 * [!32](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/32) Pass through ID of email Activity with mail params.
@@ -10,6 +10,8 @@
 * [!39](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/39) Don't overwrite contact ID when trigger is contact-based.
 * [!31](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/31) Link to the 'Edit MessageTemplate' in action description.
 * [!41](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/41) Add composer's package name.
+* [!46](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/46) Add code that accidently got removed to disable smarty via API param
+* [!49](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/49) Fix entityname processing such that ContributionRecur tokens work.
 
 ## Version 2.7
 
