@@ -108,8 +108,7 @@ class CRM_Emailapi_Form_CivirulesAction_Send extends CRM_Core_Form {
     return $return;
   }
 
-  function buildQuickForm() {
-
+  public function buildQuickForm() {
     $this->setFormTitle();
     $this->registerRule('emailList', 'callback', 'emailList', 'CRM_Utils_Rule');
     $this->add('hidden', 'rule_action_id');
