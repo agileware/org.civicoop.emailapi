@@ -137,15 +137,20 @@ class CRM_Emailapi_CivirulesAction_Send extends CRM_CivirulesActions_Generic_Api
   public function userFriendlyConditionParams() {
     $template = 'unknown template';
     $params = $this->getActionParameters();
-    if (empty($params['from_email']) && empty($params['from_name']) && !empty($params['from_email_option'])) {
-      $fromEmailOptionLabel = \Civi\Api4\OptionValue::get(FALSE)
-        ->addSelect('label')
-        ->addWhere('value', '=', $params['from_email_option'])
-        ->addWhere('option_group_id:name', '=', 'from_email_address')
-        ->addWhere('is_active', '=', TRUE)
-        ->execute()
-        ->first()['label'] ?? E::ts('ERROR - missing from email');
-      $fromAddress = htmlspecialchars($fromEmailOptionLabel);
+    if (empty($params['from_email']) && empty($params['from_name'])) {
+      if (!empty($params['from_email_option'])) {
+        $fromEmailOptionLabel = \Civi\Api4\OptionValue::get(FALSE)
+            ->addSelect('label')
+            ->addWhere('value', '=', $params['from_email_option'])
+            ->addWhere('option_group_id:name', '=', 'from_email_address')
+            ->addWhere('is_active', '=', TRUE)
+            ->execute()
+            ->first()['label'] ?? E::ts('ERROR - missing from email');
+        $fromAddress = htmlspecialchars($fromEmailOptionLabel);
+      }
+      else {
+        $fromAddress = E::ts('Default domain from email address');
+      }
     }
     else {
       $fromAddress = htmlspecialchars("\"{$params['from_name']} <{$params['from_email']}>\"");
