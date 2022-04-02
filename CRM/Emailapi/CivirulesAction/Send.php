@@ -137,6 +137,19 @@ class CRM_Emailapi_CivirulesAction_Send extends CRM_CivirulesActions_Generic_Api
   public function userFriendlyConditionParams() {
     $template = 'unknown template';
     $params = $this->getActionParameters();
+    if (empty($params['from_email']) && empty($params['from_name']) && !empty($params['from_email_option'])) {
+      $fromEmailOptionLabel = \Civi\Api4\OptionValue::get(FALSE)
+        ->addSelect('label')
+        ->addWhere('value', '=', $params['from_email_option'])
+        ->addWhere('option_group_id:name', '=', 'from_email_address')
+        ->addWhere('is_active', '=', TRUE)
+        ->execute()
+        ->first()['label'] ?? E::ts('ERROR - missing from email');
+      $fromAddress = htmlspecialchars($fromEmailOptionLabel);
+    }
+    else {
+      $fromAddress = htmlspecialchars("\"{$params['from_name']} <{$params['from_email']}>\"");
+    }
     $messageTemplates = new CRM_Core_DAO_MessageTemplate();
     $messageTemplates->id = $params['template_id'];
     $messageTemplates->is_active = true;
@@ -159,7 +172,7 @@ class CRM_Emailapi_CivirulesAction_Send extends CRM_CivirulesActions_Generic_Api
     else {
       $locationText = "primary email address";
     }
-    $to = E::ts('the contact');
+    $to = E::ts('the contact (using %1)', [1 => $locationText]);
     if (!empty($params['alternative_receiver_address'])) {
       $to = $params['alternative_receiver_address'];
     }
@@ -171,14 +184,12 @@ class CRM_Emailapi_CivirulesAction_Send extends CRM_CivirulesActions_Generic_Api
     if (!empty($params['bcc'])) {
       $bcc = E::ts(' and bcc to %1', [1=>$params['bcc']]);
     }
-    return E::ts('Send email from "%1 (%2 using %3)" with Template "%4" to %5 %6 %7', [
-      1=>$params['from_name'],
-      2=>$params['from_email'],
-      3=>$locationText,
-      4=>$template,
-      5 => $to,
-      6 => $cc,
-      7 => $bcc
+    return E::ts("Send email from '%1' with Template '%2' to %3 %4 %5", [
+      1 => $fromAddress,
+      2 => $template,
+      3 => $to,
+      4 => $cc,
+      5 => $bcc
     ]);
   }
   /**
