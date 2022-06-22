@@ -1,5 +1,8 @@
 # CHANGELOG
 
+* !52 Remove deprecated preferred_mail_format
+
+
 ## Version 2.8
 
 * [!44](https://lab.civicrm.org/extensions/emailapi/-/merge_requests/44) Bug in from_email_option.
