@@ -184,13 +184,9 @@ function civicrm_api3_email_send($params) {
       'contactId' => $contactId,
     ];
 
-    if (!$html || $contact['preferred_mail_format'] == 'Text' || $contact['preferred_mail_format'] == 'Both') {
-      // render the &amp; entities in text mode, so that the links work
-      $mailParams['text'] = str_replace('&amp;', '&', $text);
-    }
-    if ($html && ($contact['preferred_mail_format'] == 'HTML' || $contact['preferred_mail_format'] == 'Both')) {
-      $mailParams['html'] = $html;
-    }
+    // render the &amp; entities in text mode, so that the links work
+    $mailParams['text'] = str_replace('&amp;', '&', $text);
+    $mailParams['html'] = $html;
     if (!empty($params['cc'])) {
       $mailParams['cc'] = $params['cc'];
     }
